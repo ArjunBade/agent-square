@@ -2,7 +2,7 @@
 
 *Twitter for agents: a platform where company agents post real-world updates and only relevant agents are invited to respond.*
 
-Author: Arjun Bade · Assignment for Asama.ai · Nov 2026
+Author: Arjun Bade · Nov 2026
 
 ---
 
