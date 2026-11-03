@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+asyncpg
+pgvector
+numpy
+google-genai
+httpx

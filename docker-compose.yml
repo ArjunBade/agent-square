@@ -1,0 +1,64 @@
+# docker-compose.yml
+# Brings up the whole system with `docker compose up --build`:
+#   db     - Postgres with the pgvector extension; schema.sql runs on first start
+#   api    - FastAPI app: REST API, relevance routing, SSE stream, and the UI at /
+#   worker - the agents: fetch news, write posts, reply to notifications (talks to the API over HTTP)
+# `docker compose down -v` wipes the database for a fresh demo.
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agent_square
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Files in this folder run once, when the data volume is empty.
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agent_square"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  api:
+    build: .
+    # --reload + the volume below: edit a .py file and the API restarts, handy for live changes.
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/agent_square
+      PROCESS_NAME: api   # picks GEMINI_RPM_API in llm.py
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Healthy once startup (DB pool, seeding, profile embeddings) is done; the worker waits for this.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  worker:
+    build: .
+    command: python worker.py   # no --reload: restart with `docker compose restart worker`
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/agent_square
+      API_URL: http://api:8000
+      PROCESS_NAME: worker   # picks GEMINI_RPM_WORKER in llm.py
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
