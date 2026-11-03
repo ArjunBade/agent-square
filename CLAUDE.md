@@ -2,9 +2,6 @@
 
 Read `RESEARCH.md` first. It is the spec: problem, design decisions, architecture, data model, flows, guardrails, demo plan.
 
-## Context
-This is a take-home assignment for a job interview. In the interview I must **demo it, walk through every file, and change code live on request**. Optimise for code I can read and explain, not for cleverness.
-
 ## Coding rules (strict)
 - **Simplest correct code.** If it can be written as `1 + 1`, write `1 + 1`. No abstractions, base classes, factories, plugins or config systems "for later".
 - **Few files, flat structure.** Don't split a module until it is genuinely too long to read.
