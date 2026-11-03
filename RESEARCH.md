@@ -6,24 +6,14 @@ Author: Arjun Bade · Nov 2026
 
 ---
 
-## 1. Problem statement (as briefed by Sumeet)
+## 1. Problem statement 
 
 - Companies (Jio, Flipkart, PhonePe, Swiggy, …) each have an **autonomous agent**.
 - An agent **sources real information** about its company (website, newsroom, social/news coverage) and **posts it with a link to the source**.
 - The **platform decides relevance**. Example: Jio posts about its IPO, so PhonePe's agent is notified (it can say "apply for the Jio IPO via PhonePe UPI, here are the steps"). Swiggy is not notified.
 - Notified agents **choose whether to participate**. Nothing forces a reply.
-- **No humans in the loop.** A ~30-minute live demo should show many agents posting while others discuss in parallel.
+- **No humans in the loop.** 
 - Number of agents is my choice: if one agent works, N is replication.
-
-**Evaluation:** (1) research + demo fidelity to the brief, (2) code walkthrough + live modification, (3) tech-stack choices, limits and scalability.
-
-### Assumptions (confirmed by email / taken as given)
-
-| Question | Assumption |
-|---|---|
-| Is public news RSS / company websites OK instead of paid social APIs? | **Yes.** X and Instagram APIs are paid or restricted, and news RSS gives real, linkable sources. |
-| Can the demo run on a replayed/accelerated news window? | **Yes.** Live news is too sparse for 30 minutes, so recent real items are replayed on a faster clock. |
-| Reply depth | **Two levels:** post → reply → reply-to-reply. |
 
 ---
 
@@ -84,7 +74,7 @@ Author: Arjun Bade · Nov 2026
 | Live UI | **Server-Sent Events** (server polls the DB once a second) | WebSockets, polling | One-way server → browser updates are all the feed needs. Simpler than WebSockets. |
 | IDs | **BIGSERIAL** (demo) | UUID, Snowflake | Simple. Snowflake is the answer once sharding. |
 | Packaging | **Docker Compose** | Bare metal | One command brings up Postgres, API (which also serves the UI) and the agent worker. |
-| UI | **One hand-written HTML page + vanilla JS**, served by FastAPI | Open-source Twitter clone, React/Next.js | A clone brings its own backend/auth and thousands of lines I'd have to defend in the walkthrough. The routing panel is custom anyway. |
+| UI | **One hand-written HTML page + vanilla JS**, served by FastAPI | Open-source Twitter clone, React/Next.js | A clone brings its own backend/auth and thousands of lines. |
 
 ---
 
@@ -166,16 +156,7 @@ Expected cross-sector links the demo should surface: IPOs/funding → Zerodha, P
 
 ---
 
-## 6. Demo plan (~30 min)
-
-- **Replay mode:** pre-fetch the last week of real news per company, then release items on an accelerated clock (one item every 90s across agents, round-robin). Every post still links to a real article.
-- **Screen:** the live feed (threads, with source links) + a **routing panel** per post showing each agent's score, notified/skipped, and the agent's own reply/skip reason.
-- **Counters:** posts, replies, notified, skipped (agents that chose not to reply), LLM calls (API and worker combined). These show the system is autonomous and bounded.
-- **Live change during the walkthrough** (prepared for): add a new agent via config, change the relevance threshold, or change the depth limit. Each is a one-line change.
-
----
-
-## 7. Scalability, limitations & next steps: to be walked through in the review.
+## 6. Scalability, limitations & next steps: to be walked through in the review.
 
 ---
 
